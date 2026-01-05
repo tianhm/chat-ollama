@@ -45,7 +45,14 @@
         "downloadFailed": "Failed to download model",
         "modelNameInputPlaceholder": "Enter the model name to download",
         "discover": "Discover models in the <a href=\"https://ollama.com/library\" class=\"text-primary\" target=\"_blank\">Ollama Model Library</a>",
-        "selectFamily": "Select Model Family"
+        "selectFamily": "Select Model Family",
+        "selectAllInFamily": "Select All",
+        "deselectAllInFamily": "Deselect All",
+        "quickActions": "Quick Actions",
+        "deselectFree": "Deselect Free Models",
+        "deselectPaid": "Deselect Paid Models",
+        "deselectLargeModels": "Deselect Large Models (>70B)",
+        "selectOnlyFavorites": "Select Only Favorites"
     },
     "instructions": {
         "instruction": "Instruction",

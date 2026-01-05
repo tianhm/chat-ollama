@@ -147,6 +147,35 @@ const clearAllSelections = () => {
   onChange([])
 }
 
+// Deselect a single model
+const deselectModel = (modelValue: string) => {
+  models.value = models.value.filter(m => m !== modelValue)
+  onChange(models.value)
+}
+
+// Select all models in current family
+const selectAllInFamily = () => {
+  if (!selectedFamily.value) return
+  const familyModels = modelsByFamily.value[selectedFamily.value] || []
+  tempSelection.value = familyModels.map(m => m.value)
+  applySelection()
+}
+
+// Deselect all models in current family
+const deselectAllInFamily = () => {
+  tempSelection.value = []
+  applySelection()
+}
+
+// Deselect all models from a specific family (used in family view)
+const deselectFamilyModels = (family: string) => {
+  const familyModels = modelsByFamily.value[family] || []
+  const familyModelValues = familyModels.map(m => m.value)
+  models.value = models.value.filter(m => !familyModelValues.includes(m))
+  onChange(models.value)
+}
+
+
 // Back to family selection
 const backToFamilies = () => {
   currentView.value = 'families'
@@ -263,19 +292,45 @@ onClickOutside(dropdownRef, () => {
               </UButton>
             </div>
 
+            <!-- Selected Models List -->
+            <div v-if="models.length > 0 && models.length <= 10" class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Selected Models ({{ models.length }})
+                </h4>
+              </div>
+              <div class="space-y-1 max-h-32 overflow-y-auto">
+                <div
+                  v-for="modelValue in models"
+                  :key="modelValue"
+                  class="flex items-center justify-between p-2 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                  <span class="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
+                    {{ chatModels.find(m => m.value === modelValue)?.label || modelValue }}
+                  </span>
+                  <UButton
+                    size="xs"
+                    color="gray"
+                    variant="ghost"
+                    icon="i-heroicons-x-mark-20-solid"
+                    @click="deselectModel(modelValue)"
+                    class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 flex-shrink-0">
+                  </UButton>
+                </div>
+              </div>
+            </div>
+
             <div class="space-y-2 max-h-64 overflow-y-auto">
               <div
                    v-for="{ family, count, hasSelected } in familyList"
                    :key="family"
-                   class="flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                   class="flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 group"
                    :class="[
                     hasSelected
                       ? 'border-primary-300 bg-primary-50 dark:border-primary-700 dark:bg-primary-900/20'
                       : 'border-gray-200 dark:border-gray-700'
-                  ]"
-                   @click="selectFamily(family)">
+                  ]">
 
-                <div class="flex items-center">
+                <div class="flex items-center cursor-pointer flex-1" @click="selectFamily(family)">
                   <div class="w-2 h-2 rounded-full mr-3"
                        :class="hasSelected ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600'">
                   </div>
@@ -283,8 +338,19 @@ onClickOutside(dropdownRef, () => {
                 </div>
 
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span class="mr-2">{{ count }} models</span>
-                  <UIcon name="i-heroicons-chevron-right-20-solid" class="w-4 h-4" />
+                  <!-- Quick deselect button for selected families -->
+                  <UButton
+                    v-if="hasSelected"
+                    size="xs"
+                    color="gray"
+                    variant="ghost"
+                    icon="i-heroicons-minus-20-solid"
+                    :title="t('models.deselectAllInFamily')"
+                    @click.stop="deselectFamilyModels(family)"
+                    class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  </UButton>
+                  <span class="mr-2 cursor-pointer" @click="selectFamily(family)">{{ count }} models</span>
+                  <UIcon name="i-heroicons-chevron-right-20-solid" class="w-4 h-4 cursor-pointer" @click="selectFamily(family)" />
                 </div>
               </div>
             </div>
@@ -293,17 +359,40 @@ onClickOutside(dropdownRef, () => {
           <!-- Model Selection View -->
           <div v-else-if="currentView === 'models' && selectedFamily" class="flex flex-col max-h-[500px]">
             <!-- Header -->
-            <div class="flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <UButton
-                       icon="i-heroicons-arrow-left-20-solid"
-                       size="xs"
-                       color="gray"
-                       variant="ghost"
-                       @click="backToFamilies"
-                       class="mr-2" />
-              <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {{ selectedFamily }}
-              </h3>
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center">
+                <UButton
+                         icon="i-heroicons-arrow-left-20-solid"
+                         size="xs"
+                         color="gray"
+                         variant="ghost"
+                         @click="backToFamilies"
+                         class="mr-2" />
+                <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {{ selectedFamily }}
+                </h3>
+              </div>
+
+              <!-- Quick selection buttons -->
+              <div class="flex items-center space-x-2">
+                <UButton
+                  size="xs"
+                  color="gray"
+                  variant="ghost"
+                  @click="selectAllInFamily"
+                  class="text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400">
+                  {{ t('models.selectAllInFamily') }}
+                </UButton>
+                <UButton
+                  v-if="tempSelection.length > 0"
+                  size="xs"
+                  color="gray"
+                  variant="ghost"
+                  @click="deselectAllInFamily"
+                  class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400">
+                  {{ t('models.deselectAllInFamily') }}
+                </UButton>
+              </div>
             </div>
 
             <!-- Search Box (if more than 6 models) -->

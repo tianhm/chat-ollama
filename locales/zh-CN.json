@@ -45,7 +45,14 @@
         "downloadFailed": "下载模型失败",
         "modelNameInputPlaceholder": "输入模型名称回车后下载模型",
         "discover": "从 <a href=\"https://ollama.com/library\" class=\"text-primary\" target=\"_blank\">Ollama 模型库</a>中寻找模型",
-        "selectFamily": "选择模型家族"
+        "selectFamily": "选择模型家族",
+        "selectAllInFamily": "全选",
+        "deselectAllInFamily": "全部取消",
+        "quickActions": "快捷操作",
+        "deselectFree": "取消免费模型",
+        "deselectPaid": "取消付费模型",
+        "deselectLargeModels": "取消大模型 (>70B)",
+        "selectOnlyFavorites": "仅选择收藏"
     },
     "instructions": {
         "instruction": "指令",
